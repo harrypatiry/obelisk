@@ -36,10 +36,6 @@ notify = f"{name} has connected."
 if notify:
     s.send(notify.encode())   
 
-alphabet = "abcdefghijklmnopqrstuvwxyz"
-letter_to_index = dict(zip(alphabet, range(len(alphabet))))
-index_to_letter = dict(zip(range(len(alphabet)), alphabet))
-
 alphabet = "abcdefghijklmnopqrstuvwxyz "
 letter_to_index = dict(zip(alphabet, range(len(alphabet))))
 index_to_letter = dict(zip(range(len(alphabet)), alphabet))
