@@ -23,6 +23,9 @@ client_color = random.choice(colors)
 SERVER_HOST = "127.0.0.1"
 SERVER_PORT = 5002 # server's port
 separator_token = "<SEP>" # we will use this to separate the client name & message
+cipher = ''
+message = ''
+key = ''
 
 # initialize TCP socket
 s = socket.socket()
@@ -30,6 +33,8 @@ print(f"[*] Connecting to {SERVER_HOST}:{SERVER_PORT}...")
 # connect to the server
 s.connect((SERVER_HOST, SERVER_PORT))
 print("[+] Connected.")
+help = "help:    /h \nexit: /q \ndecrypt: /d \nencrypt: /e"
+print(help)
 # prompt the client for a name
 name = input("Enter your name: ")
 notify = f"{name} has connected."
@@ -64,7 +69,7 @@ class Vigenere:
 
     def decrypt(self):
         #to decrypt:
-        #enciphered index = (cipher index - keyword index) mod 26
+        #deciphered index = (cipher index - keyword index) mod 26
         decrypted = ""
         #split the message to the length of the key
         split_encrypted = [self.cipher[i : i + len(self.key)] for i in range(0, len(self.cipher), len(self.key))]
@@ -90,25 +95,37 @@ t.daemon = True
 # start the thread
 t.start()
 
-while True:
-    # input message we want to send to the server
-    to_send = input()
-    if to_send:
-        key = input("please enter an encryption key: ")
-    # a way to exit the program
-    if to_send.lower() == 'q':
-        break
+def send_message(key, message):
+    o1 = Vigenere(message, key, cipher)
+    encrypted_message = o1.encrypt()
     # add the datetime, name & the color of the sender
-    date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
-    # to_send = f"{client_color}[{date_now}] {name}{separator_token}{to_send}{Fore.RESET}"
-    message = to_send.lower()
-    cipher = ''
     # encrypt and send the formatted message
-    p1 = Vigenere(message, key, cipher)
-    encrypted_message = p1.encrypt()
+    date_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
     format_message = f"{client_color}[{date_now}] {name}{separator_token}{encrypted_message}{Fore.RESET}"
     # s.send(to_send.encode())
     s.send(format_message.encode())
+
+def decrypt_message(key, cipher):
+    o2 = Vigenere(message, key, cipher)
+    decrypted_message = o2.decrypt()
+    print(f"decrypted message: {decrypted_message}")
+
+while True:
+    # input message we want to send to the server
+    to_send = input()
+    # a way to exit the program
+    if to_send.lower() == '/q':
+        print('exiting program')
+        break
+    elif to_send.lower() == '/d':
+        cipher = input("input encrypted message: ")
+        if cipher:
+            key = input("please enter an encryption key: ")
+            decrypt_message(key, cipher)
+    else:
+        key = input("please enter an encryption key: ")
+        message = to_send.lower()
+        send_message(key, message)
 
 # close the socket
 s.close()
